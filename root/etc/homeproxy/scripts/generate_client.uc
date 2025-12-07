@@ -106,6 +106,10 @@ if (routing_mode !== 'custom') {
 const proxy_mode = uci.get(uciconfig, ucimain, 'proxy_mode') || 'redirect_tproxy',
       default_interface = uci.get(uciconfig, ucicontrol, 'bind_interface');
 
+const clash_api_port = uci.get(uciconfig, ucicontrol, 'clash_api_port');
+const clash_api_secret = uci.get(uciconfig, ucicontrol, 'clash_api_secret');
+const clash_api_ui = uci.get(uciconfig, ucicontrol, 'clash_api_ui');
+
 const mixed_port = uci.get(uciconfig, uciinfra, 'mixed_port') || '5330';
 
 let self_mark, redirect_port, tproxy_port, tun_name,
@@ -364,7 +368,7 @@ function get_outbound(cfg) {
 			const node = uci.get(uciconfig, cfg, 'node');
 			if (isEmpty(node))
 				die(sprintf("%s's node is missing, please check your configuration.", cfg));
-			else if (node === 'urltest')
+			else if (node === 'urltest' || node === 'selector' || node === 'fallback')
 				return 'cfg-' + cfg + '-out';
 			else
 				return 'cfg-' + node + '-out';
@@ -749,6 +753,24 @@ if (!isEmpty(main_node)) {
 				interrupt_exist_connections: strToBool(cfg.urltest_interrupt_exist_connections)
 			});
 			urltest_nodes = [...urltest_nodes, ...filter(cfg.urltest_nodes, (l) => !~index(urltest_nodes, l))];
+		} else if (cfg.node === 'selector') {
+			push(config.outbounds, {
+				type: 'selector',
+				tag: 'cfg-' + cfg['.name'] + '-out',
+				outbounds: map(cfg.selector_nodes, (k) => `cfg-${k}-out`),
+				interrupt_exist_connections: strToBool(cfg.selector_interrupt_exist_connections)
+			});
+			urltest_nodes = [...urltest_nodes, ...filter(cfg.selector_nodes, (l) => !~index(urltest_nodes, l))];
+		} else if (cfg.node === 'fallback') {
+			push(config.outbounds, {
+				type: 'fallback',
+				tag: 'cfg-' + cfg['.name'] + '-out',
+				outbounds: map(cfg.fallback_nodes, (k) => `cfg-${k}-out`),
+				url: cfg.fallback_url,
+				interval: strToTime(cfg.fallback_interval),
+				idle_timeout: strToTime(cfg.fallback_idle_timeout)
+			});
+			urltest_nodes = [...urltest_nodes, ...filter(cfg.fallback_nodes, (l) => !~index(urltest_nodes, l))];
 		} else {
 			const outbound = uci.get_all(uciconfig, cfg.node) || {};
 			if (outbound.type === 'wireguard') {
@@ -959,16 +981,28 @@ if (!isEmpty(main_node)) {
 /* Routing rules end */
 
 /* Experimental start */
+/* Experimental start */
+config.experimental = {};
+
 if (routing_mode in ['bypass_mainland_china', 'custom']) {
-	config.experimental = {
-		cache_file: {
-			enabled: true,
-			path: RUN_DIR + '/cache.db',
-			store_rdrc: strToBool(cache_file_store_rdrc),
-			rdrc_timeout: strToTime(cache_file_rdrc_timeout),
-		}
+	config.experimental.cache_file = {
+		enabled: true,
+		path: RUN_DIR + '/cache.db',
+		store_rdrc: strToBool(cache_file_store_rdrc),
+		rdrc_timeout: strToTime(cache_file_rdrc_timeout),
 	};
 }
+
+if (!isEmpty(clash_api_port)) {
+	config.experimental.clash_api = {
+		external_controller: '0.0.0.0:' + clash_api_port,
+		external_ui: clash_api_ui,
+		secret: clash_api_secret
+	};
+}
+
+if (isEmpty(config.experimental))
+	delete config.experimental;
 /* Experimental end */
 
 system('mkdir -p ' + RUN_DIR);

@@ -85,13 +85,13 @@ return view.extend({
 		let m, s, o, ss, so;
 
 		let features = data[1],
-		    hosts = data[2]?.hosts;
+			hosts = data[2]?.hosts;
 
 		/* Cache all configured proxy nodes, they will be called multiple times */
 		let proxy_nodes = {};
 		uci.sections(data[0], 'node', (res) => {
 			let nodeaddr = ((res.type === 'direct') ? res.override_address : res.address) || '',
-			    nodeport = ((res.type === 'direct') ? res.override_port : res.port) || '';
+				nodeport = ((res.type === 'direct') ? res.override_port : res.port) || '';
 
 			proxy_nodes[res['.name']] =
 				String.format('[%s] %s', res.type, res.label || ((stubValidator.apply('ip6addr', nodeaddr) ?
@@ -111,7 +111,7 @@ return view.extend({
 			});
 
 			return E('div', { class: 'cbi-section', id: 'status_bar' }, [
-					E('p', { id: 'service_status' }, _('Collecting data...'))
+				E('p', { id: 'service_status' }, _('Collecting data...'))
 			]);
 		}
 
@@ -125,7 +125,7 @@ return view.extend({
 		for (let i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
-		o.depends({'routing_mode': 'custom', '!reverse': true});
+		o.depends({ 'routing_mode': 'custom', '!reverse': true });
 		o.rmempty = false;
 
 		o = s.taboption('routing', hp.CBIStaticList, 'main_urltest_nodes', _('URLTest nodes'),
@@ -154,7 +154,7 @@ return view.extend({
 		for (let i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
-		o.depends({'routing_mode': /^((?!custom).)+$/, 'proxy_mode': /^((?!redirect$).)+$/});
+		o.depends({ 'routing_mode': /^((?!custom).)+$/, 'proxy_mode': /^((?!redirect$).)+$/ });
 		o.rmempty = false;
 
 		o = s.taboption('routing', hp.CBIStaticList, 'main_udp_urltest_nodes', _('URLTest nodes'),
@@ -188,8 +188,8 @@ return view.extend({
 		o.value('117.50.10.10', _('ThreatBook Public DNS (117.50.10.10)'));
 		o.default = '8.8.8.8';
 		o.rmempty = false;
-		o.depends({'routing_mode': 'custom', '!reverse': true});
-		o.validate = function(section_id, value) {
+		o.depends({ 'routing_mode': 'custom', '!reverse': true });
+		o.validate = function (section_id, value) {
 			if (section_id && !['wan'].includes(value)) {
 				if (!value)
 					return _('Expecting: %s').format(_('non-empty value'));
@@ -205,7 +205,7 @@ return view.extend({
 						return true;
 					else
 						return _('Expecting: %s').format(_('valid DNS server address'));
-				} catch(e) {}
+				} catch (e) { }
 
 				if (!stubValidator.apply((ipv6_support === '1') ? 'ipaddr' : 'ip4addr', value))
 					return _('Expecting: %s').format(_('valid DNS server address'));
@@ -224,7 +224,7 @@ return view.extend({
 		o.depends('routing_mode', 'bypass_mainland_china');
 		o.default = '223.5.5.5';
 		o.rmempty = false;
-		o.validate = function(section_id, value) {
+		o.validate = function (section_id, value) {
 			if (section_id && !['wan'].includes(value)) {
 				if (!value)
 					return _('Expecting: %s').format(_('non-empty value'));
@@ -239,7 +239,7 @@ return view.extend({
 						return true;
 					else
 						return _('Expecting: %s').format(_('valid DNS server address'));
-				} catch(e) {}
+				} catch (e) { }
 
 				if (!stubValidator.apply('ipaddr', value))
 					return _('Expecting: %s').format(_('valid DNS server address'));
@@ -256,7 +256,7 @@ return view.extend({
 		o.value('global', _('Global'));
 		o.default = 'bypass_mainland_china';
 		o.rmempty = false;
-		o.onchange = function(ev, section_id, value) {
+		o.onchange = function (ev, section_id, value) {
 			if (section_id && value === 'custom')
 				this.map.save(null, true);
 		}
@@ -265,7 +265,7 @@ return view.extend({
 			_('Specify target ports to be proxied. Multiple ports must be separated by commas.'));
 		o.value('', _('All ports'));
 		o.value('common', _('Common ports only (bypass P2P traffic)'));
-		o.validate = function(section_id, value) {
+		o.validate = function (section_id, value) {
 			if (section_id && value && value !== 'common') {
 
 				let ports = [];
@@ -315,7 +315,7 @@ return view.extend({
 		so.depends('homeproxy.config.proxy_mode', 'redirect_tun');
 		so.depends('homeproxy.config.proxy_mode', 'tun');
 		so.rmempty = false;
-		so.onchange = function(ev, section_id, value) {
+		so.onchange = function (ev, section_id, value) {
 			let desc = ev.target.nextElementSibling;
 			if (value === 'mixed')
 				desc.innerHTML = _('Mixed <code>system</code> TCP stack and <code>gVisor</code> UDP stack.')
@@ -356,7 +356,7 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'default_outbound', _('Default outbound'),
 			_('Default outbound for connections not matched by any routing rules.'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -375,7 +375,7 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'default_outbound_dns', _('Default outbound DNS'),
 			_('Default DNS server for resolving domain name in the server address.'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -414,93 +414,25 @@ return view.extend({
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
 		so.default = so.enabled;
 		so.rmempty = false;
-		so.editable = true;
-
-		so = ss.option(form.ListValue, 'node', _('Node'),
-			_('Outbound node'));
-		so.value('urltest', _('URLTest'));
-		for (let i in proxy_nodes)
-			so.value(i, proxy_nodes[i]);
-		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'node');
-		so.editable = true;
-
-		so = ss.option(form.ListValue, 'domain_resolver', _('Domain resolver'),
-			_('For resolving domain name in the server address.'));
-		so.load = function(section_id) {
-			delete this.keylist;
-			delete this.vallist;
-
-			this.value('', _('Default'));
-			this.value('default-dns', _('Default DNS (issued by WAN)'));
-			this.value('system-dns', _('System DNS'));
-			uci.sections(data[0], 'dns_server', (res) => {
-				if (res.enabled === '1')
-					this.value(res['.name'], res.label);
-			});
-
-			return this.super('load', section_id);
-		}
-		so.depends({'node': 'urltest', '!reverse': true});
-		so.modalonly = true;
-
-		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
-			_('The domain strategy for resolving the domain name in the address.'));
-		for (let i in hp.dns_strategy)
-			so.value(i, hp.dns_strategy[i]);
-		so.depends({'node': 'urltest', '!reverse': true});
-		so.modalonly = true;
-
-		so = ss.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
-			_('The network interface to bind to.'));
-		so.multiple = false;
-		so.noaliases = true;
-		so.depends({'outbound': '', 'node': /^((?!urltest$).)+$/});
-		so.modalonly = true;
-
-		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
-			_('The tag of the upstream outbound.<br/>Other dial fields will be ignored when enabled.'));
-		so.load = function(section_id) {
-			delete this.keylist;
-			delete this.vallist;
-
-			this.value('', _('Direct'));
-			uci.sections(data[0], 'routing_node', (res) => {
-				if (res['.name'] !== section_id && res.enabled === '1')
-					this.value(res['.name'], res.label);
-			});
-
-			return this.super('load', section_id);
-		}
-		so.validate = function(section_id, value) {
-			if (section_id && value) {
-				let node = this.section.formvalue(section_id, 'node');
-
-				let conflict = false;
-				uci.sections(data[0], 'routing_node', (res) => {
-					if (res['.name'] !== section_id) {
-						if (res.outbound === section_id && res['.name'] == value)
-							conflict = true;
-						else if (res.node === 'urltest' && res.urltest_nodes?.includes(node) && res['.name'] == value)
-							conflict = true;
-					}
-				});
-				if (conflict)
-					return _('Recursive outbound detected!');
-			}
+		so.value(i, proxy_nodes[i]);
+		so.depends('node', 'urltest');
+		so.validate = function (section_id) {
+			let value = this.section.formvalue(section_id, 'urltest_nodes');
+			if (section_id && this.section.formvalue(section_id, 'node') === 'urltest' && !value.length)
+				return _('Expecting: %s').format(_('non-empty value'));
 
 			return true;
 		}
-		so.depends({'node': 'urltest', '!reverse': true});
-		so.editable = true;
+		so.modalonly = true;
 
-		so = ss.option(hp.CBIStaticList, 'urltest_nodes', _('URLTest nodes'),
-			_('List of nodes to test.'));
+		so = ss.option(hp.CBIStaticList, 'selector_nodes', _('Selector nodes'),
+			_('List of nodes to select.'));
 		for (let i in proxy_nodes)
 			so.value(i, proxy_nodes[i]);
-		so.depends('node', 'urltest');
-		so.validate = function(section_id) {
-			let value = this.section.formvalue(section_id, 'urltest_nodes');
-			if (section_id && !value.length)
+		so.depends('node', 'selector');
+		so.validate = function (section_id) {
+			let value = this.section.formvalue(section_id, 'selector_nodes');
+			if (section_id && this.section.formvalue(section_id, 'node') === 'selector' && !value.length)
 				return _('Expecting: %s').format(_('non-empty value'));
 
 			return true;
@@ -510,14 +442,14 @@ return view.extend({
 		so = ss.option(form.Value, 'urltest_url', _('Test URL'),
 			_('The URL to test.'));
 		so.placeholder = 'https://www.gstatic.com/generate_204';
-		so.validate = function(section_id, value) {
+		so.validate = function (section_id, value) {
 			if (section_id && value) {
 				try {
 					let url = new URL(value);
 					if (!url.hostname)
 						return _('Expecting: %s').format(_('valid URL'));
 				}
-				catch(e) {
+				catch (e) {
 					return _('Expecting: %s').format(_('valid URL'));
 				}
 			}
@@ -531,7 +463,7 @@ return view.extend({
 			_('The test interval in seconds.'));
 		so.datatype = 'uinteger';
 		so.placeholder = '180';
-		so.validate = function(section_id, value) {
+		so.validate = function (section_id, value) {
 			if (section_id && value) {
 				let idle_timeout = this.section.formvalue(section_id, 'idle_timeout') || '1800';
 				if (parseInt(value) > parseInt(idle_timeout))
@@ -557,9 +489,72 @@ return view.extend({
 		so.depends('node', 'urltest');
 		so.modalonly = true;
 
+		so = ss.option(hp.CBIStaticList, 'fallback_nodes', _('Fallback nodes'),
+			_('List of nodes to fallback.'));
+		for (let i in proxy_nodes)
+			so.value(i, proxy_nodes[i]);
+		so.depends('node', 'fallback');
+		so.validate = function (section_id) {
+			let value = this.section.formvalue(section_id, 'fallback_nodes');
+			if (section_id && this.section.formvalue(section_id, 'node') === 'fallback' && !value.length)
+				return _('Expecting: %s').format(_('non-empty value'));
+
+			return true;
+		}
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'fallback_url', _('Test URL'),
+			_('The URL to test.'));
+		so.placeholder = 'https://www.gstatic.com/generate_204';
+		so.validate = function (section_id, value) {
+			if (section_id && value) {
+				try {
+					let url = new URL(value);
+					if (!url.hostname)
+						return _('Expecting: %s').format(_('valid URL'));
+				}
+				catch (e) {
+					return _('Expecting: %s').format(_('valid URL'));
+				}
+			}
+
+			return true;
+		}
+		so.depends('node', 'fallback');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'fallback_interval', _('Test interval'),
+			_('The test interval in seconds.'));
+		so.datatype = 'uinteger';
+		so.placeholder = '300';
+		so.validate = function (section_id, value) {
+			if (section_id && value) {
+				let idle_timeout = this.section.formvalue(section_id, 'fallback_idle_timeout') || '1800';
+				if (parseInt(value) > parseInt(idle_timeout))
+					return _('Test interval must be less or equal than idle timeout.');
+			}
+
+			return true;
+		}
+		so.depends('node', 'fallback');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'fallback_idle_timeout', _('Idle timeout'),
+			_('The idle timeout in seconds.'));
+		so.datatype = 'uinteger';
+		so.placeholder = '1800';
+		so.depends('node', 'fallback');
+		so.modalonly = true;
+
 		so = ss.option(form.Flag, 'urltest_interrupt_exist_connections', _('Interrupt existing connections'),
 			_('Interrupt existing connections when the selected outbound has changed.'));
+
 		so.depends('node', 'urltest');
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'selector_interrupt_exist_connections', _('Interrupt existing connections'),
+			_('Interrupt existing connections when the selected outbound has changed.'));
+		so.depends('node', 'selector');
 		so.modalonly = true;
 		/* Routing nodes end */
 
@@ -594,12 +589,12 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.ListValue, 'mode', _('Mode'),
 			_('The default rule uses the following matching logic:<br/>' +
-			'<code>(domain || domain_suffix || domain_keyword || domain_regex || ip_cidr || ip_is_private)</code> &&<br/>' +
-			'<code>(port || port_range)</code> &&<br/>' +
-			'<code>(source_ip_cidr || source_ip_is_private)</code> &&<br/>' +
-			'<code>(source_port || source_port_range)</code> &&<br/>' +
-			'<code>other fields</code>.<br/>' +
-			'Additionally, included rule sets can be considered merged rather than as a single rule sub-item.'));
+				'<code>(domain || domain_suffix || domain_keyword || domain_regex || ip_cidr || ip_is_private)</code> &&<br/>' +
+				'<code>(port || port_range)</code> &&<br/>' +
+				'<code>(source_ip_cidr || source_ip_is_private)</code> &&<br/>' +
+				'<code>(source_port || source_port_range)</code> &&<br/>' +
+				'<code>other fields</code>.<br/>' +
+				'Additionally, included rule sets can be considered merged rather than as a single rule sub-item.'));
 		so.value('default', _('Default'));
 		so.default = 'default';
 		so.rmempty = false;
@@ -645,7 +640,7 @@ return view.extend({
 
 		so = ss.taboption('field_other', hp.CBIStaticList, 'rule_set', _('Rule set'),
 			_('Match rule set.'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -677,7 +672,7 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.ListValue, 'outbound', _('Outbound'),
 			_('Tag of the target outbound.'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -748,7 +743,7 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.ListValue, 'resolve_server', _('DNS server'),
 			_('Specifies DNS server tag to use instead of selecting through DNS routing.'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -773,7 +768,7 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.Flag, 'reject_no_drop', _('Don\'t drop packets'),
 			_('<code>%s</code> will be temporarily overwritten to <code>%s</code> after 50 triggers in 30s if not enabled.').format(
-			_('Method'), _('Drop packets')));
+				_('Method'), _('Drop packets')));
 		so.depends('reject_method', 'default');
 		so.modalonly = true;
 
@@ -797,7 +792,7 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.Value, 'resolve_client_subnet', _('EDNS Client subnet'),
 			_('Append a <code>edns0-subnet</code> OPT extra record with the specified IP prefix to every query by default.<br/>' +
-			'If value is an IP address instead of prefix, <code>/32</code> or <code>/128</code> will be appended automatically.'));
+				'If value is an IP address instead of prefix, <code>/32</code> or <code>/128</code> will be appended automatically.'));
 		so.datatype = 'or(cidr, ipaddr)';
 		so.depends('action', 'resolve');
 		so.modalonly = true;
@@ -880,7 +875,7 @@ return view.extend({
 			so.value(i, hp.dns_strategy[i]);
 
 		so = ss.option(form.ListValue, 'default_server', _('Default DNS server'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -907,12 +902,12 @@ return view.extend({
 
 		so = ss.option(form.Value, 'client_subnet', _('EDNS Client subnet'),
 			_('Append a <code>edns0-subnet</code> OPT extra record with the specified IP prefix to every query by default.<br/>' +
-			'If value is an IP address instead of prefix, <code>/32</code> or <code>/128</code> will be appended automatically.'));
+				'If value is an IP address instead of prefix, <code>/32</code> or <code>/128</code> will be appended automatically.'));
 		so.datatype = 'or(cidr, ipaddr)';
 
 		so = ss.option(form.Flag, 'cache_file_store_rdrc', _('Store RDRC'),
 			_('Store rejected DNS response cache.<br/>' +
-			'The check results of <code>Address filter DNS rule items</code> will be cached until expiration.'));
+				'The check results of <code>Address filter DNS rule items</code> will be cached until expiration.'));
 
 		so = ss.option(form.Value, 'cache_file_rdrc_timeout', _('RDRC timeout'),
 			_('Timeout of rejected DNS response cache in seconds. <code>604800 (7d)</code> is used by default.'));
@@ -987,7 +982,7 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'address_resolver', _('Address resolver'),
 			_('Tag of a another server to resolve the domain name in the address. Required if address contains domain.'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -1001,7 +996,7 @@ return view.extend({
 
 			return this.super('load', section_id);
 		}
-		so.validate = function(section_id, value) {
+		so.validate = function (section_id, value) {
 			if (section_id && value) {
 				let conflict = false;
 				uci.sections(data[0], 'dns_server', (res) => {
@@ -1021,12 +1016,12 @@ return view.extend({
 			_('The domain strategy for resolving the domain name in the address.'));
 		for (let i in hp.dns_strategy)
 			so.value(i, hp.dns_strategy[i]);
-		so.depends({'address_resolver': '', '!reverse': true});
+		so.depends({ 'address_resolver': '', '!reverse': true });
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
 			_('Tag of an outbound for connecting to the dns server.'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -1074,12 +1069,12 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.ListValue, 'mode', _('Mode'),
 			_('The default rule uses the following matching logic:<br/>' +
-			'<code>(domain || domain_suffix || domain_keyword || domain_regex)</code> &&<br/>' +
-			'<code>(port || port_range)</code> &&<br/>' +
-			'<code>(source_ip_cidr || source_ip_is_private)</code> &&<br/>' +
-			'<code>(source_port || source_port_range)</code> &&<br/>' +
-			'<code>other fields</code>.<br/>' +
-			'Additionally, included rule sets can be considered merged rather than as a single rule sub-item.'));
+				'<code>(domain || domain_suffix || domain_keyword || domain_regex)</code> &&<br/>' +
+				'<code>(port || port_range)</code> &&<br/>' +
+				'<code>(source_ip_cidr || source_ip_is_private)</code> &&<br/>' +
+				'<code>(source_port || source_port_range)</code> &&<br/>' +
+				'<code>other fields</code>.<br/>' +
+				'Additionally, included rule sets can be considered merged rather than as a single rule sub-item.'));
 		so.value('default', _('Default'));
 		so.default = 'default';
 		so.rmempty = false;
@@ -1118,7 +1113,7 @@ return view.extend({
 
 		so = ss.taboption('field_other', hp.CBIStaticList, 'rule_set', _('Rule set'),
 			_('Match rule set.'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -1154,7 +1149,7 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.ListValue, 'server', _('Server'),
 			_('Tag of the target dns server.'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -1193,7 +1188,7 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.Value, 'client_subnet', _('EDNS Client subnet'),
 			_('Append a <code>edns0-subnet</code> OPT extra record with the specified IP prefix to every query by default.<br/>' +
-			'If value is an IP address instead of prefix, <code>/32</code> or <code>/128</code> will be appended automatically.'));
+				'If value is an IP address instead of prefix, <code>/32</code> or <code>/128</code> will be appended automatically.'));
 		so.datatype = 'or(cidr, ipaddr)';
 		so.depends('action', 'route');
 		so.depends('action', 'route-options');
@@ -1351,7 +1346,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'url', _('Rule set URL'));
-		so.validate = function(section_id, value) {
+		so.validate = function (section_id, value) {
 			if (section_id) {
 				if (!value)
 					return _('Expecting: %s').format(_('non-empty value'));
@@ -1361,7 +1356,7 @@ return view.extend({
 					if (!url.hostname)
 						return _('Expecting: %s').format(_('valid URL'));
 				}
-				catch(e) {
+				catch (e) {
 					return _('Expecting: %s').format(_('valid URL'));
 				}
 			}
@@ -1374,7 +1369,7 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
 			_('Tag of the outbound to download rule set.'));
-		so.load = function(section_id) {
+		so.load = function (section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
@@ -1429,7 +1424,7 @@ return view.extend({
 		so.depends('lan_proxy_mode', 'except_listed');
 
 		so = fwtool.addIPOption(ss, 'lan_ip_policy', 'lan_direct_ipv6_ips', _('Direct IPv6 IP-s'), null, 'ipv6', hosts, true);
-		so.depends({'lan_proxy_mode': 'except_listed', 'homeproxy.config.ipv6_support': '1'});
+		so.depends({ 'lan_proxy_mode': 'except_listed', 'homeproxy.config.ipv6_support': '1' });
 
 		so = fwtool.addMACOption(ss, 'lan_ip_policy', 'lan_direct_mac_addrs', _('Direct MAC-s'), null, hosts);
 		so.depends('lan_proxy_mode', 'except_listed');
@@ -1438,7 +1433,7 @@ return view.extend({
 		so.depends('lan_proxy_mode', 'listed_only');
 
 		so = fwtool.addIPOption(ss, 'lan_ip_policy', 'lan_proxy_ipv6_ips', _('Proxy IPv6 IP-s'), null, 'ipv6', hosts, true);
-		so.depends({'lan_proxy_mode': 'listed_only', 'homeproxy.config.ipv6_support': '1'});
+		so.depends({ 'lan_proxy_mode': 'listed_only', 'homeproxy.config.ipv6_support': '1' });
 
 		so = fwtool.addMACOption(ss, 'lan_ip_policy', 'lan_proxy_mac_addrs', _('Proxy MAC-s'), null, hosts);
 		so.depends('lan_proxy_mode', 'listed_only');
@@ -1451,13 +1446,13 @@ return view.extend({
 		so = fwtool.addMACOption(ss, 'lan_ip_policy', 'lan_gaming_mode_mac_addrs', _('Gaming mode MAC-s'), null, hosts);
 
 		so = fwtool.addIPOption(ss, 'lan_ip_policy', 'lan_global_proxy_ipv4_ips', _('Global proxy IPv4 IP-s'), null, 'ipv4', hosts, true);
-		so.depends({'homeproxy.config.routing_mode': 'custom', '!reverse': true});
+		so.depends({ 'homeproxy.config.routing_mode': 'custom', '!reverse': true });
 
 		so = fwtool.addIPOption(ss, 'lan_ip_policy', 'lan_global_proxy_ipv6_ips', _('Global proxy IPv6 IP-s'), null, 'ipv6', hosts, true);
-		so.depends({'homeproxy.config.routing_mode': /^((?!custom).)+$/, 'homeproxy.config.ipv6_support': '1'});
+		so.depends({ 'homeproxy.config.routing_mode': /^((?!custom).)+$/, 'homeproxy.config.ipv6_support': '1' });
 
 		so = fwtool.addMACOption(ss, 'lan_ip_policy', 'lan_global_proxy_mac_addrs', _('Global proxy MAC-s'), null, hosts);
-		so.depends({'homeproxy.config.routing_mode': 'custom', '!reverse': true});
+		so.depends({ 'homeproxy.config.routing_mode': 'custom', '!reverse': true });
 		/* LAN IP policy end */
 
 		/* WAN IP policy start */
@@ -1485,22 +1480,22 @@ return view.extend({
 		so.rows = 10;
 		so.monospace = true;
 		so.datatype = 'hostname';
-		so.depends({'homeproxy.config.routing_mode': 'custom', '!reverse': true});
-		so.load = function(/* ... */) {
+		so.depends({ 'homeproxy.config.routing_mode': 'custom', '!reverse': true });
+		so.load = function (/* ... */) {
 			return L.resolveDefault(callReadDomainList('proxy_list')).then((res) => {
 				return res.content;
 			}, {});
 		}
-		so.write = function(_section_id, value) {
+		so.write = function (_section_id, value) {
 			return callWriteDomainList('proxy_list', value);
 		}
-		so.remove = function(/* ... */) {
+		so.remove = function (/* ... */) {
 			let routing_mode = this.section.formvalue('config', 'routing_mode');
 			if (routing_mode !== 'custom')
 				return callWriteDomainList('proxy_list', '');
 			return true;
 		}
-		so.validate = function(section_id, value) {
+		so.validate = function (section_id, value) {
 			if (section_id && value)
 				for (let i of value.split('\n'))
 					if (i && !stubValidator.apply('hostname', i))
@@ -1517,22 +1512,22 @@ return view.extend({
 		so.rows = 10;
 		so.monospace = true;
 		so.datatype = 'hostname';
-		so.depends({'homeproxy.config.routing_mode': 'custom', '!reverse': true});
-		so.load = function(/* ... */) {
+		so.depends({ 'homeproxy.config.routing_mode': 'custom', '!reverse': true });
+		so.load = function (/* ... */) {
 			return L.resolveDefault(callReadDomainList('direct_list')).then((res) => {
 				return res.content;
 			}, {});
 		}
-		so.write = function(_section_id, value) {
+		so.write = function (_section_id, value) {
 			return callWriteDomainList('direct_list', value);
 		}
-		so.remove = function(/* ... */) {
+		so.remove = function (/* ... */) {
 			let routing_mode = this.section.formvalue('config', 'routing_mode');
 			if (routing_mode !== 'custom')
 				return callWriteDomainList('direct_list', '');
 			return true;
 		}
-		so.validate = function(section_id, value) {
+		so.validate = function (section_id, value) {
 			if (section_id && value)
 				for (let i of value.split('\n'))
 					if (i && !stubValidator.apply('hostname', i))
@@ -1541,6 +1536,37 @@ return view.extend({
 			return true;
 		}
 		/* Direct domain list end */
+
+		/* Clash API settings start */
+		ss.tab('clash_api', _('Clash API'));
+
+		so = ss.taboption('clash_api', form.Value, 'clash_api_port', _('External controller port'),
+			_('RESTful API port for Clash.'));
+		so.datatype = 'port';
+		so.placeholder = '9090';
+
+		so = ss.taboption('clash_api', form.Value, 'clash_api_ui', _('External UI path'),
+			_('Path to the Clash Dashboard UI.'));
+		so.placeholder = '/usr/share/homeproxy/ui';
+
+		so = ss.taboption('clash_api', form.Value, 'clash_api_secret', _('API Secret'),
+			_('Secret for the RESTful API.'));
+		so.password = true;
+
+		so = ss.taboption('clash_api', form.DummyValue, '_open_ui');
+		so.render = function () {
+			let port = this.section.formvalue('control', 'clash_api_port') || '9090';
+			let hosts = window.location.host;
+			let url = 'http://' + hosts.split(':')[0] + ':' + port + '/ui';
+			return E('div', {}, [
+				E('a', {
+					'class': 'cbi-button cbi-button-apply',
+					'href': url,
+					'target': '_blank'
+				}, _('Open Dashboard'))
+			]);
+		}
+		/* Clash API settings end */
 		/* ACL settings end */
 
 		return m.render();
